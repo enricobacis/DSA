@@ -1,9 +1,17 @@
 package sdu.tek.dsa;
 
+import java.net.InetAddress;
+
 public interface ISensor {
+	
+	// start the startserver
+	public void startServer();
 	
 	// return an unique identifier for this object
 	public int getSensorId();
+	
+	// return the address for this object
+	public InetAddress getAddress();
 	
 	// return the udp port for this object
 	public int getPort();
