@@ -1,6 +1,6 @@
 package sdu.tek.dsa;
 
-public class Demo {
+public class EnvironmentDemo {
 	
 	public static void main(String[] args) {
 		
