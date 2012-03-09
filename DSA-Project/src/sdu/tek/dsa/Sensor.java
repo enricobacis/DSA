@@ -1,29 +1,31 @@
 package sdu.tek.dsa;
 
+import java.text.DecimalFormat;
+
 public class Sensor implements ISensor {
 
-	@Override
+	public static final double MIN_TEMP = -20.00;
+	public static final double MAX_TEMP = 35;
+	
+	private int sensorID;
+	public Sensor(int sensorID) {
+		
+		this.sensorID = sensorID;
+	}
+	
 	public int getSensorId() {
-		// TODO Auto-generated method stub
-		return 0;
+		
+		return sensorID;
 	}
 
-	@Override
-	public int getPort() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
 	public String getTemperature() {
-		// TODO Auto-generated method stub
-		return null;
+		DecimalFormat df = new DecimalFormat("0.00");
+		return df.format(MIN_TEMP + (Math.random() * ((MAX_TEMP - MIN_TEMP) + 1))); 
 	}
 
-	@Override
 	public String getHumidity() {
-		// TODO Auto-generated method stub
-		return null;
+		DecimalFormat df = new DecimalFormat("0.00");
+		return df.format((0 + (Math.random() * ((100 - 0) + 1)))); 
 	}
 
 }
