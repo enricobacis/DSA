@@ -1,12 +1,29 @@
 package sdu.tek.dsa;
 
-public interface Sensor {
-	  // return an unique identifier for this object
-    public int getSensorId();
+public class Sensor implements ISensor {
 
-    // return a value between -20.00°C and 35.00°C
-    public String getTemperature();
-    
-    // return a value between 0.0% and 100.0%
-    public String getHumidity();
-    }
+	@Override
+	public int getSensorId() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int getPort() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public String getTemperature() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getHumidity() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+}
