@@ -35,7 +35,6 @@ public class Sensor extends Thread implements ISensor {
 		startServer();
 	}
 	
-	@Override
 	public void startServer() {
 		try {
 			datagramSocket = new DatagramSocket(port);

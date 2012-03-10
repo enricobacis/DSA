@@ -4,16 +4,13 @@ import java.net.InetAddress;
 
 public interface ISensor {
 	
-	// start the startserver
-	public void startServer();
-	
 	// return an unique identifier for this object
 	public int getSensorId();
 	
 	// return the address for this object
 	public InetAddress getAddress();
 	
-	// return the udp port for this object
+	// return the UDP port for this object
 	public int getPort();
 
 	// return a value between -20.00C and 35.00C
