@@ -1,4 +1,4 @@
-package sdu.tek.dsa;
+package sdu.dsa.sensor;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -120,5 +120,10 @@ public class Sensor extends Thread implements ISensor {
 		String info = "Temperature: " + getTemperature() + " Humidity: " + getHumidity();
 		DatagramPacket infoPacket = new DatagramPacket(info.getBytes(), info.getBytes().length, clientAddress, clientPort);
 		datagramSocket.send(infoPacket);
+	}
+	
+	public static void main(String[] args) {
+		Sensor sensor = new Sensor();
+		sensor.startServer();
 	}
 }

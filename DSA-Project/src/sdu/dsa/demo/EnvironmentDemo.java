@@ -1,6 +1,9 @@
-package sdu.tek.dsa;
+package sdu.dsa.demo;
 
 import java.io.IOException;
+
+import sdu.dsa.monitor.Monitor;
+import sdu.dsa.sensor.Sensor;
 
 public class EnvironmentDemo {
 

@@ -1,4 +1,4 @@
-package sdu.tek.dsa;
+package sdu.dsa.server;
 
 public class Server {
 
