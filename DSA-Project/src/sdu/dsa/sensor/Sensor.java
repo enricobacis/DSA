@@ -1,5 +1,7 @@
 package sdu.dsa.sensor;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -8,60 +10,63 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.text.DecimalFormat;
 
+import javax.swing.Timer;
 
-public class Sensor extends Thread implements ISensor {
 
-	public static final int    BASE_PORT = 5000;
+public class Sensor implements ISensor {
+	
 	public static final double MIN_TEMP  = -20.00;
 	public static final double MAX_TEMP  = 35;
-	public static int lastID = 0;
 	
 	private int sensorID;
-	private int port;
 	private double lastTemperature;
 	private double lastHumidity;
 	private DatagramSocket datagramSocket;
+	private InetAddress monitorAddress;
+	private int monitorPort;
+	private ListeningThread listeningThread;
+	private Timer handshakeTimer;
 	
-	
-	public Sensor() {
-		sensorID = ++lastID;
-		port = BASE_PORT + sensorID;
+	public Sensor(int sensorID, InetAddress monitorAddress, int monitorPort) {
+		this.sensorID = sensorID;
+		this.monitorAddress = monitorAddress;
+		this.monitorPort = monitorPort;
+		
 		lastTemperature = MIN_TEMP + (Math.random() * (MAX_TEMP - MIN_TEMP));
 		lastHumidity = Math.random() * 100;
-	}
-	
-	@Override
-	public void run() {
+		
 		startServer();
 	}
 	
 	public void startServer() {
 		try {
-			datagramSocket = new DatagramSocket(port);
+			datagramSocket = new DatagramSocket();
 		} catch (SocketException e) {
-			System.out.println("Cannot create a datagram socket for the sensor " + port);
+			System.out.println("Cannot create a datagram socket for the sensor " + sensorID);
 			e.printStackTrace();
 		}
 		
-		byte[] receiveBuffer = new byte[1024];
+		listeningThread = new ListeningThread();
+		listeningThread.start();
 		
-		while(true) {
-			DatagramPacket datagramPacket = new DatagramPacket(receiveBuffer, receiveBuffer.length);
-			try {
-				datagramSocket.receive(datagramPacket);
-				InetAddress clientAddress = datagramPacket.getAddress();
-				int clientPort = datagramPacket.getPort();
-				SendInfo(clientAddress, clientPort);
+		// Handshake
+		final byte[] sensorInitialization = Integer.toString(sensorID).getBytes();
+		handshakeTimer = new Timer(1000, new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				DatagramPacket datagramPacket = new DatagramPacket(sensorInitialization,
+						sensorInitialization.length, monitorAddress, monitorPort);
 				try {
-					sleep(1000);
-				} catch (InterruptedException e) {
+					datagramSocket.send(datagramPacket);
+					
+				} catch (Exception e) {
 					e.printStackTrace();
 				}
-			} catch (IOException e) {
-				System.out.println("Communication Error: " + sensorID);
-				e.printStackTrace();
 			}
-		}
+		});
+		handshakeTimer.setInitialDelay(0);
+		handshakeTimer.start();
 	}
 	
 	@Override
@@ -78,11 +83,6 @@ public class Sensor extends Thread implements ISensor {
 			e.printStackTrace();
 		}
 		return address;
-	}
-	
-	@Override
-	public int getPort() {
-		return port;
 	}
 	
 	@Override
@@ -122,8 +122,50 @@ public class Sensor extends Thread implements ISensor {
 		datagramSocket.send(infoPacket);
 	}
 	
+	private static void printError() {
+		System.out.println("Usage: Sensor sensor_id monitor_ip monitor_port");
+	}
+	
 	public static void main(String[] args) {
-		Sensor sensor = new Sensor();
-		sensor.startServer();
+		if (args.length != 3) {
+			printError();
+			return;
+		}
+		
+		int sensorID;
+		InetAddress monitorAddress;
+		int monitorPort;
+		
+		try {
+			sensorID = Integer.parseInt(args[0]);
+			monitorAddress = InetAddress.getByName(args[1]);
+			monitorPort = Integer.parseInt(args[2]);
+		} catch (Exception e) {
+			printError();
+			return;
+		}
+		
+		new Sensor(sensorID, monitorAddress, monitorPort);
+	}
+	
+	private class ListeningThread extends Thread {
+		
+		@Override
+		public void run() {
+			byte[] receiveBuffer = new byte[1024];
+			while(true) {
+				DatagramPacket datagramPacket = new DatagramPacket(receiveBuffer, receiveBuffer.length);
+				try {
+					datagramSocket.receive(datagramPacket);
+					handshakeTimer.stop();
+					InetAddress clientAddress = datagramPacket.getAddress();
+					int clientPort = datagramPacket.getPort();
+					SendInfo(clientAddress, clientPort);
+				} catch (IOException e) {
+					System.out.println("Communication Error: " + sensorID);
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 }

@@ -2,22 +2,13 @@ package sdu.dsa.demo;
 
 import java.io.IOException;
 
-import sdu.dsa.monitor.Monitor;
-import sdu.dsa.sensor.Sensor;
-
 public class EnvironmentDemo {
 
 	public static void main(String[] args) throws IOException {
-		Sensor s1 = new Sensor();
-		s1.start();
+		new ProcessBuilder("java", "./bin/sdu/dsa/monitor/Monitor").start();
 		
-		Sensor s2 = new Sensor();
-		s2.start();
-
-		Monitor monitor = new Monitor();
-		monitor.bindSensor(s1.getAddress(), s1.getPort(), 5000);
-		monitor.bindSensor(s2.getAddress(), s2.getPort(), 2000);
-
+		new ProcessBuilder("java", "./bin/sdu/dsa/sensor/Sensor", "1 127.0.0.1 5000").start();
+		new ProcessBuilder("java", "./bin/sdu/dsa/sensor/Sensor", "2 127.0.0.1 5000").start();
+		new ProcessBuilder("java", "./bin/sdu/dsa/sensor/Sensor", "3 127.0.0.1 5000").start();
 	}
-
 }

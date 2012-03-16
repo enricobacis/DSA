@@ -9,9 +9,6 @@ public interface ISensor {
 	
 	// return the address for this object
 	public InetAddress getAddress();
-	
-	// return the UDP port for this object
-	public int getPort();
 
 	// return a value between -20.00C and 35.00C
 	public String getTemperature();
