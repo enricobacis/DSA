@@ -1,11 +1,15 @@
 package sdu.dsa.monitor;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.List;
 
 public class Monitor {
 
@@ -15,7 +19,7 @@ public class Monitor {
 	public Monitor(int port) {
 		this.port = port;
 		sensors = new ArrayList<SensorClient>();
-		
+
 		ListeningThread listeningThread = new ListeningThread();
 		listeningThread.start();
 	}
@@ -25,11 +29,11 @@ public class Monitor {
 		sensors.add(sensor);
 		sensor.start();
 	}
-	
+
 	private static void printError() {
 		System.out.println("Usage: Monitor [port = 5000]");
 	}
-	
+
 	public static void main(String[] args) {
 		int port = 5000;
 		if (args.length == 1) {
@@ -41,7 +45,7 @@ public class Monitor {
 		} else if (args.length > 1) {
 			printError();
 		}
-		
+
 		new Monitor(port);
 	}
 
@@ -69,7 +73,8 @@ public class Monitor {
 			DatagramSocket datagramSocket;
 			try {
 				datagramSocket = new DatagramSocket();
-				DatagramPacket datagramPacket = new DatagramPacket(packet, packet.length, address, port);
+				DatagramPacket datagramPacket = new DatagramPacket(packet,
+						packet.length, address, port);
 				while (running) {
 					datagramSocket.send(datagramPacket);
 					datagramSocket.receive(datagramPacket);
@@ -81,11 +86,11 @@ public class Monitor {
 				e.printStackTrace();
 			}
 		}
-		
+
 		public void stopClient() {
 			running = false;
 		}
-		
+
 		public int getID() {
 			return ID;
 		}
@@ -93,7 +98,7 @@ public class Monitor {
 		public InetAddress getAddress() {
 			return address;
 		}
-		
+
 		public int getPort() {
 			return port;
 		}
@@ -108,9 +113,9 @@ public class Monitor {
 	}
 
 	private class ListeningThread extends Thread {
-		
+
 		private DatagramSocket datagramSocket;
-		
+
 		public ListeningThread() {
 			try {
 				datagramSocket = new DatagramSocket(port);
@@ -118,40 +123,59 @@ public class Monitor {
 				e.printStackTrace();
 			}
 		}
-		
+
 		@Override
 		public void run() {
 			byte[] receiveBuffer = new byte[1024];
 			InetAddress sensorAddress;
 			int sensorPort;
 			int sensorID = 0;
-			while(true) {
-				DatagramPacket datagramPacket = new DatagramPacket(receiveBuffer, receiveBuffer.length);
+			while (true) {
+				DatagramPacket datagramPacket = new DatagramPacket(
+						receiveBuffer, receiveBuffer.length);
 				try {
 					datagramSocket.receive(datagramPacket);
 					sensorAddress = datagramPacket.getAddress();
 					sensorPort = datagramPacket.getPort();
-					String sensorIDString = new String(datagramPacket.getData());
-					sensorID = Integer.parseInt(sensorIDString.substring(0, datagramPacket.getLength()));
-					
-					for ( SensorClient sensor : sensors ) {
+					List<String> command = unwrapStringPacket(datagramPacket
+							.getData());
+					sensorID = Integer.parseInt(command.get(1).trim());
+
+					for (SensorClient sensor : sensors) {
 						if (sensor.getID() == sensorID) {
 							sensor.stopClient();
 							sensors.remove(sensor);
 							break;
 						}
 					}
-					
+
 					// TODO: get the sleeptime from the database
-					SensorClient sensorClient = new SensorClient(sensorAddress, sensorPort, 1000);
+					SensorClient sensorClient = new SensorClient(sensorAddress,
+							sensorPort, 1000);
 					sensorClient.start();
 					sensors.add(sensorClient);
-					
+
 				} catch (IOException e) {
 					System.out.println("Communication Error: " + sensorID);
 					e.printStackTrace();
 				}
 			}
 		}
+	}
+
+	private List<String> unwrapStringPacket(byte[] bytes) throws IOException {
+		List<String> lst = new ArrayList<String>();
+		ByteArrayInputStream byteInputStream = new ByteArrayInputStream(bytes);
+		InputStreamReader strInputReader = new InputStreamReader(
+				byteInputStream);
+		BufferedReader bufferedReader = new BufferedReader(strInputReader);
+		String fullCommand = bufferedReader.readLine();
+		// TODO: secure the indexOf
+		lst.add(fullCommand.substring(0, fullCommand.indexOf("#") - 1));
+		fullCommand = fullCommand.substring(fullCommand.indexOf("#") + 1);
+		for (String parameter : fullCommand.split(":")) {
+			lst.add(parameter);
+		}
+		return lst;
 	}
 }

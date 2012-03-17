@@ -1,18 +1,22 @@
 package sdu.dsa.sensor;
 
-import java.net.InetAddress;
-
+/**
+ * Define the functionalities that should be provided by a Sensor
+ */
 public interface ISensor {
 	
-	// return an unique identifier for this object
-	public int getSensorId();
-	
-	// return the address for this object
-	public InetAddress getAddress();
+	/**
+	 * @return the unique identifier of the ISensor
+	 */
+	public int getId();
 
-	// return a value between -20.00C and 35.00C
+	/**
+	 * @return the textual representation (format 0.00) of the current temperature recorded by the ISensor
+	 */
 	public String getTemperature();
 
-	// return a value between 0.0% and 100.0%
+	/**
+	 * @return the textual representation (format 0.00) of the humidity percentage recorded by the ISensor
+	 */
 	public String getHumidity();
 }

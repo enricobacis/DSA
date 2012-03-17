@@ -1,171 +1,86 @@
 package sdu.dsa.sensor;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.text.DecimalFormat;
 
-import javax.swing.Timer;
-
-
+/**
+ * Simulation of a Sensor providing the functionalities of an ISensor
+ */
 public class Sensor implements ISensor {
-	
-	public static final double MIN_TEMP  = -20.00;
-	public static final double MAX_TEMP  = 35;
-	
-	private int sensorID;
+
+	/**
+	 * Mininum possible temperature recorded with this sensor
+	 */
+	public static final double MIN_TEMP = -20.00;
+	/**
+	 * Maximum possible temperature recorded with this sensor
+	 */
+	public static final double MAX_TEMP = 35;
+	/**
+	 * Contains the sensor unique identifier
+	 */
+	private int sensorId;
+	/**
+	 * Contains the last temperature provided
+	 */
 	private double lastTemperature;
+	/**
+	 * Contains the last humidity percentage provided
+	 */
 	private double lastHumidity;
-	private DatagramSocket datagramSocket;
-	private InetAddress monitorAddress;
-	private int monitorPort;
-	private ListeningThread listeningThread;
-	private Timer handshakeTimer;
-	
-	public Sensor(int sensorID, InetAddress monitorAddress, int monitorPort) {
-		this.sensorID = sensorID;
-		this.monitorAddress = monitorAddress;
-		this.monitorPort = monitorPort;
-		
+
+	/**
+	 * Creates a Sensor with it's unique identifier
+	 * 
+	 * @param sensorId
+	 *            the unique identifier of the sensor
+	 */
+	public Sensor(int sensorId) {
+		this.sensorId = sensorId;
 		lastTemperature = MIN_TEMP + (Math.random() * (MAX_TEMP - MIN_TEMP));
 		lastHumidity = Math.random() * 100;
-		
-		startServer();
 	}
-	
-	public void startServer() {
-		try {
-			datagramSocket = new DatagramSocket();
-		} catch (SocketException e) {
-			System.out.println("Cannot create a datagram socket for the sensor " + sensorID);
-			e.printStackTrace();
-		}
-		
-		listeningThread = new ListeningThread();
-		listeningThread.start();
-		
-		// Handshake
-		final byte[] sensorInitialization = Integer.toString(sensorID).getBytes();
-		handshakeTimer = new Timer(1000, new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				DatagramPacket datagramPacket = new DatagramPacket(sensorInitialization,
-						sensorInitialization.length, monitorAddress, monitorPort);
-				try {
-					datagramSocket.send(datagramPacket);
-					
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-		handshakeTimer.setInitialDelay(0);
-		handshakeTimer.start();
-	}
-	
+
+	/**
+	 * @return the unique identifier of the sensor
+	 */
 	@Override
-	public int getSensorId() {
-		return sensorID;
+	public int getId() {
+		return sensorId;
 	}
-	
-	@Override
-	public InetAddress getAddress() {
-		InetAddress address = null;
-		try {
-			address = InetAddress.getLocalHost();
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
-		}
-		return address;
-	}
-	
+
+	/**
+	 * @return the textual representation (format 0.00) of the current
+	 *         temperature recorded by the sensor
+	 */
 	@Override
 	public String getTemperature() {
-		double temperature = lastTemperature + Math.random() - 0.5;
-		
-		if (temperature < MIN_TEMP)
-			temperature = MIN_TEMP;
-		else if (temperature > MAX_TEMP)
-			temperature = MAX_TEMP;
-		
-		lastTemperature = temperature;
-		
+		// We evolve of max +0.5 or -0.5 degree
+		double nextTemperature = lastTemperature + Math.random() - 0.5;
+		// We stay in the defined bounds
+		nextTemperature = nextTemperature < MIN_TEMP
+				|| nextTemperature > MAX_TEMP ? lastTemperature
+				: nextTemperature;
+
+		lastTemperature = nextTemperature;
 		DecimalFormat df = new DecimalFormat("0.00");
-		return df.format(temperature);
+		return df.format(nextTemperature);
 	}
-	
+
+	/**
+	 * @return the textual representation (format 0.00) of the humidity
+	 *         percentage recorded by the sensor
+	 */
 	@Override
 	public String getHumidity() {
-		double humidity = lastHumidity + Math.random() - 0.5;
-		
-		if (humidity < MIN_TEMP)
-			humidity = MIN_TEMP;
-		else if (humidity > MAX_TEMP)
-			humidity = MAX_TEMP;
-		
-		lastHumidity = humidity;
-		
+		// We evolve of max +0.5 or -0.5 %
+		double nextHumidity = lastHumidity + Math.random() - 0.5;
+		// We stay in the defined bounds
+		nextHumidity = nextHumidity < 0 || nextHumidity > 100 ? lastHumidity
+				: nextHumidity;
+
+		lastHumidity = nextHumidity;
 		DecimalFormat df = new DecimalFormat("0.00");
-		return df.format(humidity); 
+		return df.format(nextHumidity);
 	}
-	
-	public void SendInfo(InetAddress clientAddress, int clientPort) throws IOException
-	{
-		String info = "Temperature: " + getTemperature() + " Humidity: " + getHumidity();
-		DatagramPacket infoPacket = new DatagramPacket(info.getBytes(), info.getBytes().length, clientAddress, clientPort);
-		datagramSocket.send(infoPacket);
-	}
-	
-	private static void printError() {
-		System.out.println("Usage: Sensor sensor_id monitor_ip monitor_port");
-	}
-	
-	public static void main(String[] args) {
-		if (args.length != 3) {
-			printError();
-			return;
-		}
-		
-		int sensorID;
-		InetAddress monitorAddress;
-		int monitorPort;
-		
-		try {
-			sensorID = Integer.parseInt(args[0]);
-			monitorAddress = InetAddress.getByName(args[1]);
-			monitorPort = Integer.parseInt(args[2]);
-		} catch (Exception e) {
-			printError();
-			return;
-		}
-		
-		new Sensor(sensorID, monitorAddress, monitorPort);
-	}
-	
-	private class ListeningThread extends Thread {
-		
-		@Override
-		public void run() {
-			byte[] receiveBuffer = new byte[1024];
-			while(true) {
-				DatagramPacket datagramPacket = new DatagramPacket(receiveBuffer, receiveBuffer.length);
-				try {
-					datagramSocket.receive(datagramPacket);
-					handshakeTimer.stop();
-					InetAddress clientAddress = datagramPacket.getAddress();
-					int clientPort = datagramPacket.getPort();
-					SendInfo(clientAddress, clientPort);
-				} catch (IOException e) {
-					System.out.println("Communication Error: " + sensorID);
-					e.printStackTrace();
-				}
-			}
-		}
-	}
+
 }
