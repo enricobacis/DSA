@@ -2,9 +2,6 @@ package sdu.dsa.sensor;
 
 import java.text.DecimalFormat;
 
-/**
- * Simulation of a Sensor providing the functionalities of an ISensor
- */
 public class Sensor implements ISensor {
 
 	/**
