@@ -9,7 +9,6 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.text.DecimalFormat;
-
 import javax.swing.Timer;
 
 
