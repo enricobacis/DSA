@@ -11,6 +11,8 @@ import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.crypto.Data;
+
 public class Monitor {
 
 	ArrayList<SensorClient> sensors;
@@ -73,12 +75,15 @@ public class Monitor {
 			DatagramSocket datagramSocket;
 			try {
 				datagramSocket = new DatagramSocket();
-				DatagramPacket datagramPacket = new DatagramPacket(packet,
-						packet.length, address, port);
+				byte[] dataCommand = "data".getBytes();
+				DatagramPacket sendingPacket = new DatagramPacket(dataCommand,
+						dataCommand.length, address, port);
+				DatagramPacket receivingPacket = new DatagramPacket(packet,
+						packet.length);
 				while (running) {
-					datagramSocket.send(datagramPacket);
-					datagramSocket.receive(datagramPacket);
-					String message = new String(datagramPacket.getData());
+					datagramSocket.send(sendingPacket);
+					datagramSocket.receive(receivingPacket);
+					String message = new String(receivingPacket.getData());
 					System.out.println("port:" + port + " = " + message);
 					sleep(sleeptime);
 				}

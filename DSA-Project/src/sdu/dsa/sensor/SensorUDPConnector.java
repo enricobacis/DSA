@@ -197,6 +197,16 @@ public class SensorUDPConnector implements ISensorConnector {
 	}
 
 	/**
+	 * Called by the garbage collector to perform disconnection before the
+	 * connector is erased from memory
+	 */
+	@Override
+	protected void finalize() throws Throwable {
+		disconnect();
+		super.finalize();
+	}
+
+	/**
 	 * Listener providing data to the monitor whenever it asks for it
 	 * 
 	 * @author gael
