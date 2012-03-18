@@ -137,10 +137,8 @@ public class Monitor {
 					datagramSocket.receive(datagramPacket);
 					sensorAddress = datagramPacket.getAddress();
 					sensorPort = datagramPacket.getPort();
-					List<String> command = unwrapStringPacket(datagramPacket
-							.getData());
-					sensorID = Integer.parseInt(command.get(1).trim());
-
+					String[] command = new String(datagramPacket.getData(),0, datagramPacket.getLength()).split("#");
+					sensorID = Integer.parseInt(command[1]);
 					for (SensorClient sensor : sensors) {
 						if (sensor.getID() == sensorID) {
 							sensor.stopClient();

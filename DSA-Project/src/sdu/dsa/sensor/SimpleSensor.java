@@ -2,7 +2,15 @@ package sdu.dsa.sensor;
 
 import java.text.DecimalFormat;
 
-public class Sensor implements ISensor {
+/**
+ * Simulation of a sensor providing weather information. The minimum temperature
+ * generated is {@value #MIN_TEMP} and the maximum temperature is
+ * {@value #MAX_TEMP} The initial temperature is a random temperature between
+ * the {@link #MIN_TEMP} and {@link #MAX_TEMP} The temperature and humidity
+ * percentage both evolve of maximum plus or minus 0.5 between to access to one
+ * of those values
+ */
+public class SimpleSensor implements ISensor {
 
 	/**
 	 * Mininum possible temperature recorded with this sensor
@@ -31,7 +39,7 @@ public class Sensor implements ISensor {
 	 * @param sensorId
 	 *            the unique identifier of the sensor
 	 */
-	public Sensor(int sensorId) {
+	public SimpleSensor(int sensorId) {
 		this.sensorId = sensorId;
 		lastTemperature = MIN_TEMP + (Math.random() * (MAX_TEMP - MIN_TEMP));
 		lastHumidity = Math.random() * 100;

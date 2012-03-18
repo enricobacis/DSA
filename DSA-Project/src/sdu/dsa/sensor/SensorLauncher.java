@@ -31,7 +31,7 @@ public class SensorLauncher {
 						"Error: sensor_id must be a number between 0 and 65536");
 			}
 			// Creation of a sensor with the specified parameters
-			new SensorConnector(new Sensor(sensorID), monitorAddress,
+			new SensorUDPConnector(new SimpleSensor(sensorID), monitorAddress,
 					monitorPort).connect();
 		} catch (NumberFormatException ex) {
 			System.out
