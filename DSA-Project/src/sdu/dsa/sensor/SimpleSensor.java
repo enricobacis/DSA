@@ -13,21 +13,25 @@ import java.text.DecimalFormat;
 public class SimpleSensor implements ISensor {
 
 	/**
-	 * Mininum possible temperature recorded with this sensor
+	 * Minimum possible temperature recorded with this sensor
 	 */
 	public static final double MIN_TEMP = -20.00;
+	
 	/**
 	 * Maximum possible temperature recorded with this sensor
 	 */
 	public static final double MAX_TEMP = 35;
+	
 	/**
 	 * Contains the sensor unique identifier
 	 */
 	private int sensorId;
+	
 	/**
 	 * Contains the last temperature provided
 	 */
 	private double lastTemperature;
+	
 	/**
 	 * Contains the last humidity percentage provided
 	 */

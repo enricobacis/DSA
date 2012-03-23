@@ -1,17 +1,14 @@
 package sdu.dsa.monitor;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 
-import javax.xml.crypto.Data;
+import sdu.dsa.common.MonitorDTO;
 
 public class Monitor {
 
@@ -34,6 +31,20 @@ public class Monitor {
 
 	private static void printError() {
 		System.out.println("Usage: Monitor [port = 5000]");
+	}
+	
+	private HashMap<String,Float> unwrapStringPacket(byte[] bytes) throws IOException {
+		String data = new String(bytes);
+		data = data.substring(data.indexOf("#") + 1);
+		
+		HashMap<String, Float> map = new HashMap<String, Float>();
+		
+		for (String attribute : data.split(",")) {
+			String[] token = attribute.split("=");
+			map.put(token[0], Float.parseFloat(token[1]));
+		}
+		
+		return map;
 	}
 
 	public static void main(String[] args) {
@@ -83,8 +94,9 @@ public class Monitor {
 				while (running) {
 					datagramSocket.send(sendingPacket);
 					datagramSocket.receive(receivingPacket);
-					String message = new String(receivingPacket.getData());
-					System.out.println("port:" + port + " = " + message);
+					System.out.println("port:" + port + " = " + new String(receivingPacket.getData()));
+					HashMap<String,Float> map = unwrapStringPacket(receivingPacket.getData());
+					MonitorDTO dto = new MonitorDTO(ID, map.get("timestamp").longValue(), map.get("temperature"), map.get("humidity"));
 					sleep(sleeptime);
 				}
 			} catch (Exception e) {
@@ -164,21 +176,5 @@ public class Monitor {
 				}
 			}
 		}
-	}
-
-	private List<String> unwrapStringPacket(byte[] bytes) throws IOException {
-		List<String> lst = new ArrayList<String>();
-		ByteArrayInputStream byteInputStream = new ByteArrayInputStream(bytes);
-		InputStreamReader strInputReader = new InputStreamReader(
-				byteInputStream);
-		BufferedReader bufferedReader = new BufferedReader(strInputReader);
-		String fullCommand = bufferedReader.readLine();
-		// TODO: secure the indexOf
-		lst.add(fullCommand.substring(0, fullCommand.indexOf("#") - 1));
-		fullCommand = fullCommand.substring(fullCommand.indexOf("#") + 1);
-		for (String parameter : fullCommand.split(":")) {
-			lst.add(parameter);
-		}
-		return lst;
 	}
 }
