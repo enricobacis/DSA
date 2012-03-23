@@ -10,6 +10,7 @@ import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.util.Date;
 import javax.swing.Timer;
+import sdu.dsa.common.SensorCommand;
 
 /**
  * Implement the connection service for a sensor. When the connect method is
@@ -28,13 +29,6 @@ import javax.swing.Timer;
  * 
  */
 public class SensorUDPConnector implements ISensorConnector {
-
-	/**
-	 * Enumerate the commands that the connector is able to interpret
-	 */
-	public enum Command {
-		DATA, DISCONNECT
-	};
 
 	/**
 	 * Contains the timeout used before re-sending a handshake packet to the
@@ -230,7 +224,7 @@ public class SensorUDPConnector implements ISensorConnector {
 					handshakeTimer.stop();
 					// We retrieve the command from the packet and build it's
 					// enum equivalence
-					Command command = Command.valueOf(new String(datagramPacket
+					SensorCommand command = SensorCommand.valueOf(new String(datagramPacket
 							.getData(), 0, datagramPacket.getLength())
 							.toUpperCase());
 					// The command will be handled by another thread so we can
@@ -263,7 +257,7 @@ public class SensorUDPConnector implements ISensorConnector {
 		/**
 		 * The command name
 		 */
-		Command command;
+		SensorCommand command;
 
 		/**
 		 * The address of the monitor asking for the command to be executed
@@ -288,7 +282,7 @@ public class SensorUDPConnector implements ISensorConnector {
 		 *            the port of the monitor asking for the command to be
 		 *            executed
 		 */
-		public ConnectorCommandExecutor(Command command,
+		public ConnectorCommandExecutor(SensorCommand command,
 				InetAddress monitorAdress, int monitorPort) {
 			this.command = command;
 			this.monitorAddress = monitorAdress;
