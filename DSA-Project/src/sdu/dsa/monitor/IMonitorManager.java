@@ -1,5 +1,7 @@
 package sdu.dsa.monitor;
 
+import sdu.dsa.common.MonitorDTO;
+
 /**
  * Contains the differents monitors, receive the data from them and
  * use the server connectors to send the data to the servers registered
@@ -21,7 +23,7 @@ public interface IMonitorManager {
 	
 	public void removeServerConnector(IServerConnector connector);
 	
-	public void receiveData(DataTransfertObject data);
+	public void receiveData(MonitorDTO data);
 	
 	public void receiveCommand(CommandTransfertObject command);
 	

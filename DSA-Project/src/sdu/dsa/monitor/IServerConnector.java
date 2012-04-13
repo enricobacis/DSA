@@ -1,5 +1,7 @@
 package sdu.dsa.monitor;
 
+import sdu.dsa.common.MonitorDTO;
+
 /**
  * Handle the 
  * @author gael
@@ -7,7 +9,7 @@ package sdu.dsa.monitor;
  */
 public interface IServerConnector {
 	
-	public void sendData(DataTransfertObject data);
+	public void sendData(MonitorDTO data);
 	
 	public void addManagerListener(IMonitorManager manager);
 	

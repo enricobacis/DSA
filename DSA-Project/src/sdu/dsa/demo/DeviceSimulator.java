@@ -60,13 +60,11 @@ public class DeviceSimulator extends Thread {
 			}
 
 			int exitValue = process.waitFor();
-
-			if (exitValue != 0) {
-				br = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-				while (processRunning && (line = br.readLine()) != null) {
-					System.err.println(line);
-				}	
+			br = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+			while (processRunning && (line = br.readLine()) != null) {
+				System.err.println(line);
 			}
+			
 			printInfo("terminated [return: " + exitValue + "]");
 		} catch (Exception e) {
 			printInfo("Problem with the Process");

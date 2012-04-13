@@ -1,9 +1,11 @@
 package sdu.dsa.monitor;
 
+import sdu.dsa.common.MonitorDTO;
+
 public class TCPServerConnector implements IServerConnector {
 
 	@Override
-	public void sendData(DataTransfertObject data) {
+	public void sendData(MonitorDTO data) {
 		// TODO Auto-generated method stub
 		
 	}

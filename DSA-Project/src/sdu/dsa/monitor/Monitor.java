@@ -1,65 +1,119 @@
 package sdu.dsa.monitor;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.Socket;
 import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
+
+import javax.swing.Timer;
 
 import sdu.dsa.common.MonitorDTO;
 
 public class Monitor {
 
-	ArrayList<SensorClient> sensors;
+	private ArrayList<SensorClient> sensors;
+	private List<MonitorDTO> dtoBuffer;
 	private int port;
+	private Timer sendingTimer;
+	private Socket sendingSocket;
+	private ObjectOutputStream oos;
+	
+	private static final int SENDING_TIMEOUT = 5000; 
 
-	public Monitor(int port) {
+	public Monitor(InetAddress serverIp, int serverPort, int port) {
 		this.port = port;
 		sensors = new ArrayList<SensorClient>();
+		dtoBuffer = Collections.synchronizedList(new ArrayList<MonitorDTO>());
 
 		ListeningThread listeningThread = new ListeningThread();
 		listeningThread.start();
+		
+		try {
+			sendingSocket = new Socket(serverIp, serverPort);
+			oos = new ObjectOutputStream(sendingSocket.getOutputStream());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		sendingTimer = new Timer(SENDING_TIMEOUT, new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				if (!dtoBuffer.isEmpty()) {
+					List<MonitorDTO> temp = dtoBuffer;
+					dtoBuffer = Collections.synchronizedList(new ArrayList<MonitorDTO>());
+					try {
+						oos.writeObject(new ArrayList<MonitorDTO>(temp));
+						oos.flush();
+						
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		});
+		
+		sendingTimer.start();
+	}
+	
+	protected void finalize() throws Throwable {
+		sendingSocket.close();
+		super.finalize();
 	}
 
-	public void bindSensor(InetAddress address, int port, int sleeptime) {
-		SensorClient sensor = new SensorClient(address, port, sleeptime);
+	public void bindSensor(int ID, InetAddress address, int port, int sleeptime) {
+		SensorClient sensor = new SensorClient(ID, address, port, sleeptime);
 		sensors.add(sensor);
 		sensor.start();
 	}
 
 	private static void printError() {
-		System.out.println("Usage: Monitor [port = 5000]");
+		System.out.println("Usage: Monitor server_ip server_port [listening_port = 5000]");
 	}
 	
-	private HashMap<String,Float> unwrapStringPacket(byte[] bytes) throws IOException {
+	private HashMap<String,String> unwrapStringPacket(byte[] bytes) throws IOException {
 		String data = new String(bytes);
 		data = data.substring(data.indexOf("#") + 1);
 		
-		HashMap<String, Float> map = new HashMap<String, Float>();
+		HashMap<String, String> map = new HashMap<String, String>();
 		
 		for (String attribute : data.split(",")) {
 			String[] token = attribute.split("=");
-			map.put(token[0], Float.parseFloat(token[1]));
+			map.put(token[0], token[1]);
 		}
 		
 		return map;
 	}
 
-	public static void main(String[] args) {
-		int port = 5000;
-		if (args.length == 1) {
+	public static void main(String[] args) {		
+		if (args.length < 2) {
+			printError();
+		} else if (args.length > 3) {
+			printError();
+		} else {
 			try {
-				port = Integer.parseInt(args[0]);
+				InetAddress serverIp = InetAddress.getByName(args[0]);
+				int serverPort = Integer.parseInt(args[1]);
+				
+				int port = 5000;
+				if (args.length == 3)
+					port = Integer.parseInt(args[2]);	
+				
+				new Monitor(serverIp, serverPort, port);
+				
 			} catch (Exception e) {
 				printError();
 			}
-		} else if (args.length > 1) {
-			printError();
 		}
-
-		new Monitor(port);
 	}
 
 	class SensorClient extends Thread {
@@ -69,7 +123,8 @@ public class Monitor {
 		private int sleeptime;
 		private boolean running;
 
-		public SensorClient(InetAddress address, int port, int sleeptime) {
+		public SensorClient(int ID, InetAddress address, int port, int sleeptime) {
+			this.ID = ID;
 			this.address = address;
 			this.port = port;
 			this.sleeptime = sleeptime;
@@ -95,11 +150,17 @@ public class Monitor {
 					datagramSocket.send(sendingPacket);
 					datagramSocket.receive(receivingPacket);
 					System.out.println("port:" + port + " = " + new String(receivingPacket.getData()));
-					HashMap<String,Float> map = unwrapStringPacket(receivingPacket.getData());
-					MonitorDTO dto = new MonitorDTO(ID, map.get("timestamp").longValue(), map.get("temperature"), map.get("humidity"));
+					HashMap<String,String> map = unwrapStringPacket(receivingPacket.getData());
+					
+					dtoBuffer.add(new MonitorDTO(ID,
+							Long.parseLong(map.get("timestamp").trim()),
+							Float.parseFloat(map.get("temperature").trim()),
+							Float.parseFloat(map.get("humidity").trim())));
+					
 					sleep(sleeptime);
 				}
 			} catch (Exception e) {
+				System.out.println(e.getMessage());
 				e.printStackTrace();
 			}
 		}
@@ -165,10 +226,7 @@ public class Monitor {
 					}
 
 					// TODO: get the sleeptime from the database
-					SensorClient sensorClient = new SensorClient(sensorAddress,
-							sensorPort, 1000);
-					sensorClient.start();
-					sensors.add(sensorClient);
+					bindSensor(sensorID, sensorAddress, sensorPort, 1000);
 
 				} catch (IOException e) {
 					System.out.println("Communication Error: " + sensorID);

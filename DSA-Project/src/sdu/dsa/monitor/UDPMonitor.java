@@ -1,5 +1,7 @@
 package sdu.dsa.monitor;
 
+import sdu.dsa.common.MonitorDTO;
+
 public class UDPMonitor implements IMonitor {
 
 	@Override
@@ -33,7 +35,7 @@ public class UDPMonitor implements IMonitor {
 	}
 
 	@Override
-	public void receiveData(DataTransfertObject data) {
+	public void receiveData(MonitorDTO data) {
 		// TODO Auto-generated method stub
 		
 	}

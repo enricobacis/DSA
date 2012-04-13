@@ -1,6 +1,11 @@
 package sdu.dsa.common;
 
-public class MonitorDTO {
+import java.io.Serializable;
+
+public class MonitorDTO implements Serializable{
+
+	private static final long serialVersionUID = -7670395793370067766L;
+	
 	int sensorID;
 	long timestamp;
 	float temperature;
@@ -27,5 +32,10 @@ public class MonitorDTO {
 	
 	public float getHumidity() {
 		return humidity;
+	}
+	
+	@Override
+	public String toString() {
+		return "SensorID: " + sensorID + " temp: " + temperature + " hum: " + humidity + " [" + timestamp + "]";
 	}
 }
