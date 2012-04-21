@@ -6,13 +6,14 @@ import java.net.Socket;
 import java.util.ArrayList;
 
 import sdu.dsa.common.MonitorDTO;
+import sdu.dsa.database.DBManager;
 
 public class Server {
 	
 	private ServerSocket serverSocket;
     private Socket clientSocket;
 	
-	public Server(int port) {		
+	public Server(int port) {
 		try {
 			serverSocket = new ServerSocket(port);
 			clientSocket = serverSocket.accept();
@@ -22,9 +23,8 @@ public class Server {
 				Object receivedObject = ois.readObject();
 				@SuppressWarnings("unchecked")
 				ArrayList<MonitorDTO> receivedData = (ArrayList<MonitorDTO>) receivedObject;
-				for (MonitorDTO dto : receivedData) {
-					System.out.println("##### " + dto.toString());
-				}
+				System.out.println("######## DB Store #######");
+				DBManager.storeData(receivedData);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -1,0 +1,18 @@
+CREATE TABLE sensor (
+  id           INT NOT NULL PRIMARY KEY,
+  sleeptime    BIGINT NOT NULL,
+  description  VARCHAR(100) DEFAULT '',
+  changed      BOOLEAN DEFAULT FALSE
+  );
+
+CREATE TABLE record (
+  sensorID     INT NOT NULL,
+  timestamp    BIGINT NOT NULL,
+  temperature  FLOAT NOT NULL,
+  humidity     FLOAT NOT NULL,
+  FOREIGN KEY  (sensorID) REFERENCES sensor(id),
+  PRIMARY KEY  (sensorID, timestamp)
+  );
+  
+INSERT INTO sensor (id, sleeptime, description) VALUES
+(1, 1000, 'George1'), (2, 1000, 'George2'), (3, 1000, 'George3');
