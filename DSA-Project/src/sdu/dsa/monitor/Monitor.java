@@ -26,23 +26,20 @@ public class Monitor {
 	private Timer sendingTimer;
 	private Socket sendingSocket;
 	private ObjectOutputStream oos;
+	private InetAddress serverIp;
+	private int serverPort;
 	
 	private static final int SENDING_TIMEOUT = 5000; 
 
-	public Monitor(InetAddress serverIp, int serverPort, int port) {
-		this.port = port;
+	public Monitor(InetAddress _serverIp, int _serverPort, int _port) {
+		this.serverIp = _serverIp;
+		this.serverPort = _serverPort;
+		this.port = _port;
 		sensors = new ArrayList<SensorClient>();
 		dtoBuffer = Collections.synchronizedList(new ArrayList<MonitorDTO>());
 
 		ListeningThread listeningThread = new ListeningThread();
 		listeningThread.start();
-		
-		try {
-			sendingSocket = new Socket(serverIp, serverPort);
-			oos = new ObjectOutputStream(sendingSocket.getOutputStream());
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 		
 		sendingTimer = new Timer(SENDING_TIMEOUT, new ActionListener() {
 
@@ -52,8 +49,10 @@ public class Monitor {
 					List<MonitorDTO> temp = dtoBuffer;
 					dtoBuffer = Collections.synchronizedList(new ArrayList<MonitorDTO>());
 					try {
+						sendingSocket = new Socket(serverIp, serverPort);
+						oos = new ObjectOutputStream(sendingSocket.getOutputStream());
 						oos.writeObject(new ArrayList<MonitorDTO>(temp));
-						oos.flush();
+						oos.close();
 						
 					} catch (IOException e) {
 						e.printStackTrace();

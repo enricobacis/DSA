@@ -9,8 +9,6 @@ import sdu.dsa.common.MonitorDTO;
 
 public class DBManager {
 
-	private static String dbURL = "jdbc:derby://localhost:1527/DSA;user=DSA;password=DSA";
-
 	// jdbc Connection
 	private static Connection connection;
 
@@ -19,9 +17,10 @@ public class DBManager {
 	public static Connection getConnection() {
 		if (connection == null) {
 			try	{
-				Class.forName("org.apache.derby.jdbc.ClientDriver").getInterfaces();
+				Class.forName("com.mysql.jdbc.Driver");
+
 				//Get a connection
-				connection = DriverManager.getConnection(dbURL); 
+				connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/DSA","root","root");
 			} catch (Exception except) {
 				except.printStackTrace();
 			}
@@ -39,7 +38,7 @@ public class DBManager {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public static void storeData(ArrayList<MonitorDTO> data)
 	{
 		try {

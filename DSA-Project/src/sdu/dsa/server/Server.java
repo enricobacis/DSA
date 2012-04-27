@@ -12,18 +12,21 @@ public class Server {
 	
 	private ServerSocket serverSocket;
     private Socket clientSocket;
+    private ObjectInputStream ois;
+    private boolean running;
 	
 	public Server(int port) {
 		try {
+			running = true;
 			serverSocket = new ServerSocket(port);
-			clientSocket = serverSocket.accept();
-			ObjectInputStream ois = new ObjectInputStream(clientSocket.getInputStream());
-			
-			while (!clientSocket.isClosed()) {
+			while (running) {
+				clientSocket = serverSocket.accept();
+				ois = new ObjectInputStream(clientSocket.getInputStream());
 				Object receivedObject = ois.readObject();
+				
 				@SuppressWarnings("unchecked")
 				ArrayList<MonitorDTO> receivedData = (ArrayList<MonitorDTO>) receivedObject;
-				System.out.println("######## DB Store #######");
+				System.out.println("## DB Store: " + receivedData.size() + " records received ##");
 				DBManager.storeData(receivedData);
 			}
 		} catch (Exception e) {
@@ -33,7 +36,9 @@ public class Server {
 	
 	@Override
 	protected void finalize() throws Throwable {
-		serverSocket.close();
+		running = false;
+		if (!serverSocket.isClosed())
+			serverSocket.close();
 		super.finalize();
 	}
 	
