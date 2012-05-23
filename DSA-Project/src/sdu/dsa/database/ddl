@@ -15,4 +15,4 @@ CREATE TABLE record (
   );
   
 INSERT INTO sensor (id, sleeptime, description) VALUES
-(1, 1000, 'George1'), (2, 1000, 'George2'), (3, 1000, 'George3');
+(1, 1000, 'Sensor1'), (2, 1000, 'Sensor2'), (3, 1000, 'Sensor3');

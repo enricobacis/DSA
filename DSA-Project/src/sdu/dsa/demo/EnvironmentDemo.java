@@ -7,7 +7,7 @@ public class EnvironmentDemo {
 	public static void main(String[] args) throws IOException {
 		DeviceSimulator.setDirectory(System.getProperty("user.dir") + "/bin");
 		
-		DeviceSimulator server  = new DeviceSimulator("java", "sdu.dsa.server.Server", "6001");
+		DeviceSimulator server  = new DeviceSimulator("java", "sdu.dsa.server.Server", "127.0.0.1", "5000", "6001");
 		DeviceSimulator monitor = new DeviceSimulator("java", "sdu.dsa.monitor.Monitor", "127.0.0.1", "6001");
 		DeviceSimulator sensor1 = new DeviceSimulator("java", "sdu.dsa.sensor.SensorLauncher", "1", "127.0.0.1");
 		DeviceSimulator sensor2 = new DeviceSimulator("java", "sdu.dsa.sensor.SensorLauncher", "2", "127.0.0.1");

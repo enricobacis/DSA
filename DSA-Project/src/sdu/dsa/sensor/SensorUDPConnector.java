@@ -161,7 +161,7 @@ public class SensorUDPConnector implements ISensorConnector {
 	private void sendDataPacket(InetAddress monitorAddress, int monitorPort) {
 		String strPacket = "data#" + "temperature=" + sensor.getTemperature()
 				+ ",humidity=" + sensor.getHumidity() + ",timestamp="
-				+ new Date().getTime();
+				+ new Date().getTime() + "#";
 		sendStringPacket(strPacket, monitorAddress, monitorPort);
 	}
 

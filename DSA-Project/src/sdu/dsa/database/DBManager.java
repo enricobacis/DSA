@@ -3,8 +3,12 @@ package sdu.dsa.database;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
 import sdu.dsa.common.MonitorDTO;
 
 public class DBManager {
@@ -20,7 +24,7 @@ public class DBManager {
 				Class.forName("com.mysql.jdbc.Driver");
 
 				//Get a connection
-				connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/DSA","root","root");
+				connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/DSA", "root", "root");
 			} catch (Exception except) {
 				except.printStackTrace();
 			}
@@ -51,6 +55,51 @@ public class DBManager {
 				statement.setFloat(4, dto.getHumidity());
 				statement.execute();
 			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static Map<Integer, Integer> flushSleeptimeUpdates() {
+		HashMap<Integer,Integer> result = new HashMap<Integer, Integer>();
+		
+		String sqlGetUpdates = "SELECT id, sleeptime " +
+							   "FROM sensor " +
+							   "WHERE changed<>0";
+		
+		String sqlFlushUpdates = "UPDATE sensor " +
+							     "SET changed=0";
+		
+		Connection connection = getConnection();
+		
+		try {
+			connection.setAutoCommit(false);
+			ResultSet updates = connection.createStatement().executeQuery(sqlGetUpdates);
+			connection.createStatement().executeUpdate(sqlFlushUpdates);
+			connection.commit();
+			connection.setAutoCommit(true);
+			
+			int id, sleeptime;
+			
+			while (updates.next()) {
+				id = updates.getInt("id");
+				sleeptime = updates.getInt("sleeptime");
+				result.put(id, sleeptime);
+			}
+			
+					
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return result;
+	}
+	
+	public static void initializeSleeptimeUpdates() {
+		String sql = "UPDATE sensor " +
+			     	 "SET changed=1";
+		try {
+			getConnection().createStatement().executeUpdate(sql);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
