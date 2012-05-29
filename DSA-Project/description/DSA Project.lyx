@@ -1,0 +1,338 @@
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
+\begin_document
+\begin_header
+\textclass article
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_amsmath 1
+\use_esint 1
+\use_mhchem 1
+\use_mathdots 1
+\cite_engine basic
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+
+\series bold
+DSA Project Spring 2012
+\series default
+
+\begin_inset Newline newline
+\end_inset
+
+Icy Road Early Warning System
+\end_layout
+
+\begin_layout Author
+Georgios Stoumpos
+\begin_inset Newline newline
+\end_inset
+
+Gaël Wittorski
+\begin_inset Newline newline
+\end_inset
+
+Enrico Bacis
+\begin_inset Newline newline
+\end_inset
+
+Dimitrios Politis
+\begin_inset Newline newline
+\end_inset
+
+Stefan Spasov
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage pagebreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Part*
+Introduction
+\end_layout
+
+\begin_layout Standard
+Icy Road Early Warning System is a distributed system to check the temperature
+ and the humidity by collecting data from sensor placed in different locations.
+ The system can support infinite temperature/humidity sensors, a monitor
+ to gather the data from the sensors, a server connected to a database and
+ a web server also connected to the database.
+ The code has been written to be deployed on different machines, so we have
+ a main class for every part of code that should be run on a device.
+\end_layout
+
+\begin_layout Standard
+In order not to have to start all the different main methods in different
+ virtual machines every time, we developed a class
+\shape italic
+ DeviceSimulator
+\shape default
+ based on 
+\shape italic
+ProcessBuilder
+\shape default
+.
+ We prepared a demonstration environment (
+\shape italic
+EnvironmentDemo.java
+\shape default
+ in 
+\shape italic
+sdu.dsa.demo
+\shape default
+) that can be run to start a fully functional environment (except the website
+ that needs to be started from its project).
+\end_layout
+
+\begin_layout Standard
+The device simulators are starting in different virtual machines but they
+ are redirecting the output and the errors to the EnvironmentDemo console.
+\end_layout
+
+\begin_layout Part*
+Starting the Project
+\end_layout
+
+\begin_layout Standard
+The project is made of two different parts: the program itself and the website.
+ Both the parts are written in Java.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+To start the application you need to:
+\end_layout
+
+\begin_layout Itemize
+Initialize your MySQL database (see next section)
+\end_layout
+
+\begin_layout Itemize
+Change the username and the password for the database connection in the
+ class 
+\shape italic
+DSA-Project
+\begin_inset Formula $\rightarrow$
+\end_inset
+
+src
+\begin_inset Formula $\rightarrow$
+\end_inset
+
+sdu.dsa.database
+\begin_inset Formula $\rightarrow$
+\end_inset
+
+DBManager.java
+\end_layout
+
+\begin_layout Itemize
+Run the 
+\shape italic
+EnvironmentDemo.java
+\shape default
+ in the package 
+\shape italic
+sdu.dsa.demo
+\end_layout
+
+\begin_layout Itemize
+At this point the console should start to show the different devices producing
+ their output.
+\end_layout
+
+\begin_layout Standard
+After you have managed to set up and run the application you can start the
+ website.
+ To start it you need to:
+\end_layout
+
+\begin_layout Itemize
+Change the username and the password for the database connection in the
+ class 
+\shape italic
+DSA-Website
+\begin_inset Formula $\rightarrow$
+\end_inset
+
+src
+\begin_inset Formula $\rightarrow$
+\end_inset
+
+sdu.dsa.website
+\begin_inset Formula $\rightarrow$
+\end_inset
+
+DBManager.java
+\end_layout
+
+\begin_layout Itemize
+Start the Tomcat server
+\end_layout
+
+\begin_layout Itemize
+Run the servlet HomeServlet.java on the server
+\end_layout
+
+\begin_layout Itemize
+At this point a web browser should appear with the home servlet.
+ You can enter the details page of every sensor clicking on its ID in the
+ table.
+\end_layout
+
+\begin_layout Section*
+Database Initialization
+\end_layout
+
+\begin_layout Standard
+Type the following commands in the MySQL console to inizialize the database.
+\end_layout
+
+\begin_layout LyX-Code
+CREATE DATABASE IF NOT EXISTS DSA;
+\end_layout
+
+\begin_layout LyX-Code
+USE DSA;
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+CREATE TABLE sensor (
+\end_layout
+
+\begin_layout LyX-Code
+id INT NOT NULL PRIMARY KEY,
+\end_layout
+
+\begin_layout LyX-Code
+sleeptime BIGINT NOT NULL,
+\end_layout
+
+\begin_layout LyX-Code
+description VARCHAR(100) DEFAULT '',
+\end_layout
+
+\begin_layout LyX-Code
+changed BOOLEAN DEFAULT FALSE
+\end_layout
+
+\begin_layout LyX-Code
+);
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+CREATE TABLE record (
+\end_layout
+
+\begin_layout LyX-Code
+sensorID INT NOT NULL,
+\end_layout
+
+\begin_layout LyX-Code
+timestamp BIGINT NOT NULL,
+\end_layout
+
+\begin_layout LyX-Code
+temperature FLOAT NOT NULL,
+\end_layout
+
+\begin_layout LyX-Code
+humidity FLOAT NOT NULL,
+\end_layout
+
+\begin_layout LyX-Code
+FOREIGN KEY (sensorID) REFERENCES sensor(id),
+\end_layout
+
+\begin_layout LyX-Code
+PRIMARY KEY (sensorID, timestamp)
+\end_layout
+
+\begin_layout LyX-Code
+);
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+INSERT INTO sensor (id, sleeptime, description) VALUES
+\end_layout
+
+\begin_layout LyX-Code
+(1, 60000, 'Sensor1'),
+\end_layout
+
+\begin_layout LyX-Code
+(2, 45000, 'Sensor2'),
+\end_layout
+
+\begin_layout LyX-Code
+(3, 120000, 'Sensor3');
+\end_layout
+
+\end_body
+\end_document
