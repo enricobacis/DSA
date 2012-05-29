@@ -34,7 +34,7 @@ public class UpdateSleeptimeDTO implements Serializable {
 
 	/**
 	 * Method setUpdates.
-	 * @param the updates' map.
+	 * @param updates the updates' map.
 	 */
 	public void setUpdates(Map<Integer, Integer> updates) {
 		this.updates = updates;

@@ -11,7 +11,7 @@ import java.util.Map;
 
 import sdu.dsa.common.MonitorDTO;
 
-/** Database Manager
+/** Database Manager.
  *
  * @author DSA-Project Group [Spring 2012]
  * @version 1.0

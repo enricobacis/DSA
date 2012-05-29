@@ -12,7 +12,7 @@ import java.net.UnknownHostException;
 public class SensorLauncher {
 
 	/**
-	 * Start a Sensor with the specified arguments
+	 * Start a Sensor with the specified arguments.
 	 * @param args the parameters sensor_id monitor_ip_or_host monitor_port
 	 */
 	public static void main(String[] args) {

@@ -9,7 +9,10 @@ package sdu.dsa.sensor;
 public class SensorConnectionException extends Exception {
 
 	private static final long serialVersionUID = 1906560868511962949L;
-
+	
+	/**
+	 * Default constructor.
+	 */
 	public SensorConnectionException() {
 		super();
 	}
