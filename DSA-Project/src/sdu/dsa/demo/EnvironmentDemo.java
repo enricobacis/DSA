@@ -2,8 +2,19 @@ package sdu.dsa.demo;
 
 import java.io.IOException;
 
+/** Demonstration Environment. Run this to start a fully working
+ * system environment.
+ *
+ * @author DSA-Project Group [Spring 2012]
+ * @version 1.0
+ */
 public class EnvironmentDemo {
 
+	/**
+	 * Method main.
+	 * @param args String[]
+	 * @throws IOException
+	 */
 	public static void main(String[] args) throws IOException {
 		DeviceSimulator.setDirectory(System.getProperty("user.dir") + "/bin");
 		

@@ -17,6 +17,13 @@ import sdu.dsa.common.MonitorDTO;
 import sdu.dsa.common.UpdateSleeptimeDTO;
 import sdu.dsa.database.DBManager;
 
+/**
+ * The server that is used to store the monitor's data in the database and inform the
+ * monitor about changes in the sleeptime.
+ *
+ * @author DSA-Project Group [Spring 2012]
+ * @version 1.0 
+ */
 public class Server {
 	
 	private ServerSocket serverSocket;
@@ -26,6 +33,12 @@ public class Server {
     
     private static final int SLEEPTIME_UPDATES_TIMEOUT = 5000;
 	
+	/**
+	 * Constructor for Server.
+	 * @param port server port
+	 * @param monitorIp monitor ip address
+	 * @param monitorPort monitor port
+	 */
 	public Server(int port, final InetAddress monitorIp, final int monitorPort) {
 		try {
 			running = true;
@@ -57,6 +70,8 @@ public class Server {
 			
 			sleeptimeUpdatesTimer.start();
 			
+			System.out.println("Server Started");
+			
 			while (running) {
 				clientSocket = serverSocket.accept();
 				ois = new ObjectInputStream(clientSocket.getInputStream());
@@ -72,6 +87,10 @@ public class Server {
 		}
 	}
 	
+	/**
+	 * Method finalize.
+	 * @throws Throwable
+	 */
 	@Override
 	protected void finalize() throws Throwable {
 		running = false;
@@ -80,6 +99,10 @@ public class Server {
 		super.finalize();
 	}
 	
+	/**
+	 * Method main.
+	 * @param args the starting arguments in the format: monitor_ip monitor_port [port = 6000]
+	 */
 	public static void main(String[] args) {
 		if (args.length > 3) {
 			printError();
@@ -92,6 +115,7 @@ public class Server {
 				if (args.length == 3)
 					port = Integer.parseInt(args[2]);
 				
+				System.out.println("Starting Server...");
 				new Server(port, monitorIp, monitorPort);
 				
 			} catch (Exception e) {
@@ -100,6 +124,9 @@ public class Server {
 		}
 	}
 
+	/**
+	 * Print the errors if the main method is called with wrong parameters.
+	 */
 	private static void printError() {
 		System.out.println("Usage: Server monitor_ip monitor_port [port = 6000]");
 	}

@@ -24,15 +24,15 @@ import sdu.dsa.common.SensorCommand;
  * sensor so the handshake process starts again. When the connector disconnect,
  * it sends a disconnect packet to the monitor. The disconnection of the
  * connector can also be triggered by the monitor.
- * 
- * @author gael
- * 
+ *
+ * @author DSA-Project Group [Spring 2012]
+ * @version 1.0
  */
 public class SensorUDPConnector implements ISensorConnector {
 
 	/**
 	 * Contains the timeout used before re-sending a handshake packet to the
-	 * monitor
+	 * monitor.
 	 */
 	public static final int HANDSHAKE_TIMEOUT = 1000;
 	/**
@@ -42,34 +42,34 @@ public class SensorUDPConnector implements ISensorConnector {
 	public static final int SILENCE_TIMEOUT = 60000;
 
 	/**
-	 * Contains the udpSocket used to communicate with the monitor
+	 * Contains the udpSocket used to communicate with the monitor.
 	 */
 	private DatagramSocket udpSocket;
 
 	/**
 	 * Contains the timer used to send handshake until the monitor asks
-	 * something
+	 * something.
 	 */
 	private Timer handshakeTimer;
 
 	/**
-	 * Contains the sensor which provide the data
+	 * Contains the sensor which provide the data.
 	 */
 	private ISensor sensor;
 
 	/**
-	 * Contains the monitor initial address for the handshake
+	 * Contains the monitor initial address for the handshake.
 	 */
 	private InetAddress monitorAddress;
 
 	/**
-	 * Contains the monitor initial port for the handshake
+	 * Contains the monitor initial port for the handshake.
 	 */
 	private int monitorPort;
 
 	/**
 	 * Construct a SensorConnector which provide communication services with a
-	 * monitor
+	 * monitor.
 	 * 
 	 * @param sensor
 	 *            the sensor which provide the data
@@ -96,7 +96,9 @@ public class SensorUDPConnector implements ISensorConnector {
 
 	/**
 	 * Make the handshake with the monitor and makes available the data provider
-	 * service for the monitor
+	 * service for the monitor.
+	 * @throws SensorConnectionException
+	 * @see sdu.dsa.sensor.ISensorConnector#connect()
 	 */
 	@Override
 	public void connect() throws SensorConnectionException {
@@ -120,7 +122,8 @@ public class SensorUDPConnector implements ISensorConnector {
 	}
 
 	/**
-	 * Disconnect the sensor
+	 * Disconnect the sensor.
+	 * @see sdu.dsa.sensor.ISensorConnector#disconnect()
 	 */
 	@Override
 	public void disconnect() {
@@ -133,7 +136,7 @@ public class SensorUDPConnector implements ISensorConnector {
 	}
 
 	/**
-	 * Forge a handshake packet and send it to the monitor to end communication
+	 * Forge a handshake packet and send it to the monitor to end communication.
 	 */
 	private void sendDisconnectPacket() {
 		String strPacket = "disconnect#" + sensor.getId();
@@ -141,7 +144,7 @@ public class SensorUDPConnector implements ISensorConnector {
 	}
 
 	/**
-	 * Forge a handshake packet and send it to the monitor to initiate
+	 * Forge a handshake packet and send it to the monitor to initiate.
 	 * communication
 	 */
 	private void sendConnectPacket() {
@@ -151,7 +154,7 @@ public class SensorUDPConnector implements ISensorConnector {
 
 	/**
 	 * Forge a data packet and send it back to the asking address and port (from
-	 * the monitor)
+	 * the monitor).
 	 * 
 	 * @param monitorAddress
 	 *            the monitor address asking for the data
@@ -166,7 +169,7 @@ public class SensorUDPConnector implements ISensorConnector {
 	}
 
 	/**
-	 * Send a string packet at the specified address and port
+	 * Send a string packet at the specified address and port.
 	 * 
 	 * @param strToSend
 	 *            the string that the packet will contain
@@ -192,7 +195,8 @@ public class SensorUDPConnector implements ISensorConnector {
 
 	/**
 	 * Called by the garbage collector to perform disconnection before the
-	 * connector is erased from memory
+	 * connector is erased from memory.
+	 * @throws Throwable
 	 */
 	@Override
 	protected void finalize() throws Throwable {
@@ -201,15 +205,16 @@ public class SensorUDPConnector implements ISensorConnector {
 	}
 
 	/**
-	 * Listener providing data to the monitor whenever it asks for it
-	 * 
-	 * @author gael
-	 * 
+	 * Listener providing data to the monitor whenever it asks for it.
+ 	 *
+ 	 * @author DSA-Project Group [Spring 2012]
+ 	 * @version 1.0
 	 */
 	private class ConnectorListener extends Thread {
 
 		/**
 		 * Listens for the monitor until the udpSocket is deleted
+		 * @see java.lang.Runnable#run()
 		 */
 		@Override
 		public void run() {
@@ -224,9 +229,9 @@ public class SensorUDPConnector implements ISensorConnector {
 					handshakeTimer.stop();
 					// We retrieve the command from the packet and build it's
 					// enum equivalence
-					SensorCommand command = SensorCommand.valueOf(new String(datagramPacket
-							.getData(), 0, datagramPacket.getLength())
-							.toUpperCase());
+					SensorCommand command = SensorCommand.valueOf(new String(
+							datagramPacket.getData(), 0, datagramPacket
+									.getLength()).toUpperCase());
 					// The command will be handled by another thread so we can
 					// immediately listen to other commands
 					new ConnectorCommandExecutor(command,
@@ -247,31 +252,28 @@ public class SensorUDPConnector implements ISensorConnector {
 	}
 
 	/**
-	 * Execute a command in the list of recognized commands for this sensor
-	 * 
-	 * @author gael
-	 * 
+	 * Execute a command in the list of recognized commands for this sensor.
 	 */
 	private class ConnectorCommandExecutor extends Thread {
 
 		/**
-		 * The command name
+		 * The command name.
 		 */
 		SensorCommand command;
 
 		/**
-		 * The address of the monitor asking for the command to be executed
+		 * The address of the monitor asking for the command to be executed.
 		 */
 		InetAddress monitorAddress;
 
 		/**
-		 * The port of the monitor asking for the command to be executed
+		 * The port of the monitor asking for the command to be executed.
 		 */
 		int monitorPort;
 
 		/**
 		 * Construct a ConnectorCommandExecutor ready to execute the command
-		 * passed to it
+		 * passed to it.
 		 * 
 		 * @param command
 		 *            the command name
@@ -291,6 +293,7 @@ public class SensorUDPConnector implements ISensorConnector {
 
 		/**
 		 * Run the command
+		 * @see java.lang.Runnable#run()
 		 */
 		@Override
 		public void run() {

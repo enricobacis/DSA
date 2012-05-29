@@ -7,6 +7,13 @@ import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.List;
 
+/** Class used to simulate a device and redirect the output and the
+ * error streams from the device virtual machine to the caller
+ * virtual machine.
+ *
+ * @author DSA-Project Group [Spring 2012]
+ * @version 1.0
+ */
 public class DeviceSimulator extends Thread {
 
 	private Process process;
@@ -16,25 +23,46 @@ public class DeviceSimulator extends Thread {
 
 	private static File currentDirectory = new File(".");
 
+	/**
+	 * Method setDirectory.
+	 * @param directory the working directory
+	 */
 	public static void setDirectory(String directory) {
 		currentDirectory = new File(directory); 
 	}
 
+	/**
+	 * Constructor for DeviceSimulator.
+	 * @param command the arguments to pass to the creating process
+	 * @throws IOException
+	 */
 	public DeviceSimulator(String ... command) throws IOException {
 		this(Arrays.asList(command));
 	}
 
+	/**
+	 * Constructor for DeviceSimulator.
+	 * @param command the arguments to pass to the creating process
+	 * @throws IOException
+	 */
 	public DeviceSimulator(List<String> command) throws IOException {
 		this.command = command;
 		processRunning = true;
 		start();
 	}
 	
+	/**
+	 * Stop the device.
+	 */
 	public void stopDevice() {
 		processRunning = false;
 		process.destroy();
 	}
 
+	/**
+	 * Method run.
+	 * @see java.lang.Runnable#run()
+	 */
 	@Override
 	public void run() {
 		processString = "Process " + Arrays.toString(command.toArray());
@@ -72,6 +100,10 @@ public class DeviceSimulator extends Thread {
 		}
 	}
 
+	/**
+	 * Method printInfo.
+	 * @param error String
+	 */
 	private void printInfo(String error) {
 		System.out.println(processString + ": " + error);
 	}

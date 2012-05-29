@@ -22,6 +22,13 @@ import javax.swing.Timer;
 import sdu.dsa.common.MonitorDTO;
 import sdu.dsa.common.UpdateSleeptimeDTO;
 
+/**
+ * Monitor that gathers all the data from the sensors in order
+ * to send them to the server.
+ *
+ * @author DSA-Project Group [Spring 2012]
+ * @version 1.0
+ */
 public class Monitor {
 
 	private ArrayList<SensorClient> sensors;
@@ -35,12 +42,20 @@ public class Monitor {
 	
 	private static final int SENDING_TIMEOUT = 5000;
 
+	/**
+	 * Constructor for Monitor.
+	 * @param _serverIp server ip
+	 * @param _serverPort server port
+	 * @param _port port for incoming HELLO messages from the sensors
+	 */
 	public Monitor(InetAddress _serverIp, int _serverPort, int _port) {
 		this.serverIp = _serverIp;
 		this.serverPort = _serverPort;
 		this.port = _port;
 		sensors = new ArrayList<SensorClient>();
 		dtoBuffer = Collections.synchronizedList(new ArrayList<MonitorDTO>());
+		
+		System.out.println("Monitor Started");	
 		
 		ListeningThread listeningThread = new ListeningThread();
 		listeningThread.start();
@@ -71,21 +86,41 @@ public class Monitor {
 		sendingTimer.start();
 	}
 	
+	/**
+	 * Method finalize.
+	 * @throws Throwable
+	 */
 	protected void finalize() throws Throwable {
 		sendingSocket.close();
 		super.finalize();
 	}
 
+	/**
+	 * Bind a sensor to the server.
+	 * @param ID sensor's ID
+	 * @param address sensor's ip address
+	 * @param port sensor's port
+	 * @param sleeptime sensor's sleeptime
+	 */
 	public void bindSensor(int ID, InetAddress address, int port, int sleeptime) {
 		SensorClient sensor = new SensorClient(ID, address, port, sleeptime);
 		sensors.add(sensor);
 		sensor.start();
 	}
 
+	/**
+	 * Print the errors if the main method is called with wrong parameters
+	 */
 	private static void printError() {
 		System.out.println("Usage: Monitor server_ip server_port [listening_port = 5000]");
 	}
 	
+	/**
+	 * Unwrap the string data passed from the sensor to the monitor
+	 * @param bytes the incoming data
+	 * @return A map with the data unwrapped
+	 * @throws IOException
+	 */
 	private HashMap<String,String> unwrapStringPacket(byte[] bytes) throws IOException {
 		String data = new String(bytes);
 		data = data.substring(data.indexOf("#") + 1);
@@ -101,6 +136,10 @@ public class Monitor {
 		return map;
 	}
 
+	/**
+	 * Method main.
+	 * @param args The arguments in the form: server_ip server_port [listening_port = 5000]
+	 */
 	public static void main(String[] args) {		
 		if (args.length < 2) {
 			printError();
@@ -115,6 +154,7 @@ public class Monitor {
 				if (args.length == 3)
 					port = Integer.parseInt(args[2]);	
 				
+				System.out.println("Starting Monitor...");	
 				new Monitor(serverIp, serverPort, port);
 				
 			} catch (Exception e) {
@@ -123,6 +163,12 @@ public class Monitor {
 		}
 	}
 
+	/**
+	 * Thread that wrap the connection to a sensor
+ 	 *
+ 	 * @author DSA-Project Group [Spring 2012]
+ 	 * @version 1.0
+	 */
 	class SensorClient extends Thread {
 		private int ID;
 		private InetAddress address;
@@ -130,6 +176,13 @@ public class Monitor {
 		private int sleeptime;
 		private boolean running;
 
+		/**
+		 * Constructor for SensorClient.
+		 * @param ID sensor's ID
+		 * @param address sensor's ip address 
+		 * @param port sensor's port
+		 * @param sleeptime sensor's sleeptime
+		 */
 		public SensorClient(int ID, InetAddress address, int port, int sleeptime) {
 			this.ID = ID;
 			this.address = address;
@@ -137,11 +190,18 @@ public class Monitor {
 			this.sleeptime = sleeptime;
 		}
 
+		/**
+		 * Method run.
+		 * @see java.lang.Runnable#run()
+		 */
 		@Override
 		public void run() {
 			startClient();
 		}
-
+		
+		/**
+		 * Start the client connection to the sensor.
+		 */
 		private void startClient() {
 			running = true;
 			byte[] packet = new byte[1024];
@@ -171,36 +231,68 @@ public class Monitor {
 				e.printStackTrace();
 			}
 		}
-
+		
+		/**
+		 * Stop the client connection to the sensor. 
+		 */
 		public void stopClient() {
 			running = false;
 		}
 
+		/**
+		 * Method getID.
+		 * @return the sensor's ID
+		 */
 		public int getID() {
 			return ID;
 		}
 
+		/**
+		 * Method getAddress.
+		 * @return the sensor's ip address
+		 */
 		public InetAddress getAddress() {
 			return address;
 		}
 
+		/**
+		 * Method getPort.
+		 * @return the sensor's port
+		 */
 		public int getPort() {
 			return port;
 		}
 
+		/**
+		 * Method getSleeptime.
+		 * @return the sensor's sleeptime
+		 */
 		public int getSleeptime() {
 			return sleeptime;
 		}
 
+		/**
+		 * Method setSleeptime.
+		 * @param sleeptime the sensor's sleeptime
+		 */
 		public void setSleeptime(int sleeptime) {
 			this.sleeptime = sleeptime;
 		}
 	}
 
+	/** Thread that listen from incoming HELLO messages from the sensors
+	 * that want to connect to the monitor.
+ 	 *
+ 	 * @author DSA-Project Group [Spring 2012]
+ 	 * @version 1.0
+	 */
 	private class ListeningThread extends Thread {
 
 		private DatagramSocket datagramSocket;
 
+		/**
+		 * Constructor for ListeningThread.
+		 */
 		public ListeningThread() {
 			try {
 				datagramSocket = new DatagramSocket(port);
@@ -209,6 +301,10 @@ public class Monitor {
 			}
 		}
 
+		/**
+		 * Method run.
+		 * @see java.lang.Runnable#run()
+		 */
 		@Override
 		public void run() {
 			byte[] receiveBuffer = new byte[1024];
@@ -243,10 +339,20 @@ public class Monitor {
 		}
 	}
 	
+	/**
+	 * Thread that listens to incoming DTO from the server which are
+	 * asking to change the sleeptime for a sensor.
+ 	 *
+ 	 * @author DSA-Project Group [Spring 2012]
+ 	 * @version 1.0
+	 */
 	private class UpdateSleeptimeThread extends Thread {
 
 		private ServerSocket serverSocket;
 
+		/**
+		 * Constructor for UpdateSleeptimeThread.
+		 */
 		public UpdateSleeptimeThread() {
 			try {
 				serverSocket = new ServerSocket(port);
@@ -255,6 +361,10 @@ public class Monitor {
 			}
 		}
 
+		/**
+		 * Method run.
+		 * @see java.lang.Runnable#run()
+		 */
 		@Override
 		public void run() {
 			ObjectInputStream ois;

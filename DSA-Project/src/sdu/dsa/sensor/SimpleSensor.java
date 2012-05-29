@@ -8,40 +8,41 @@ import java.text.DecimalFormat;
  * {@value #MAX_TEMP} The initial temperature is a random temperature between
  * the {@link #MIN_TEMP} and {@link #MAX_TEMP} The temperature and humidity
  * percentage both evolve of maximum plus or minus 0.5 between to access to one
- * of those values
+ * of those values.
+ *
+ * @author DSA-Project Group [Spring 2012]
+ * @version 1.0
  */
 public class SimpleSensor implements ISensor {
 
 	/**
-	 * Minimum possible temperature recorded with this sensor
+	 * Minimum possible temperature recordable with this sensor.
 	 */
 	public static final double MIN_TEMP = -20.00;
 	
 	/**
-	 * Maximum possible temperature recorded with this sensor
+	 * Maximum possible temperature recordable with this sensor.
 	 */
 	public static final double MAX_TEMP = 35;
 	
 	/**
-	 * Contains the sensor unique identifier
+	 * Contains the sensor unique identifier.
 	 */
 	private int sensorId;
 	
 	/**
-	 * Contains the last temperature provided
+	 * Contains the last temperature provided.
 	 */
 	private double lastTemperature;
 	
 	/**
-	 * Contains the last humidity percentage provided
+	 * Contains the last humidity percentage provided.
 	 */
 	private double lastHumidity;
 
 	/**
-	 * Creates a Sensor with it's unique identifier
-	 * 
-	 * @param sensorId
-	 *            the unique identifier of the sensor
+	 * Creates a Sensor with it's unique identifier.
+	 * @param sensorId the unique identifier of the sensor
 	 */
 	public SimpleSensor(int sensorId) {
 		this.sensorId = sensorId;
@@ -50,7 +51,8 @@ public class SimpleSensor implements ISensor {
 	}
 
 	/**
-	 * @return the unique identifier of the sensor
+	 * @return the unique identifier of the sensor.
+	 * @see sdu.dsa.sensor.ISensor#getId()
 	 */
 	@Override
 	public int getId() {
@@ -59,7 +61,8 @@ public class SimpleSensor implements ISensor {
 
 	/**
 	 * @return the textual representation (format 0.00) of the current
-	 *         temperature recorded by the sensor
+	 *         temperature recorded by the sensor.
+	 * @see sdu.dsa.sensor.ISensor#getTemperature()
 	 */
 	@Override
 	public String getTemperature() {
@@ -77,7 +80,8 @@ public class SimpleSensor implements ISensor {
 
 	/**
 	 * @return the textual representation (format 0.00) of the humidity
-	 *         percentage recorded by the sensor
+	 *         percentage recorded by the sensor.
+	 * @see sdu.dsa.sensor.ISensor#getHumidity()
 	 */
 	@Override
 	public String getHumidity() {

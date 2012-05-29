@@ -11,27 +11,49 @@ import java.util.Map;
 
 import sdu.dsa.common.MonitorDTO;
 
+/** Database Manager
+ *
+ * @author DSA-Project Group [Spring 2012]
+ * @version 1.0
+ */
 public class DBManager {
+	
+	// Change your connection data here
+	private static final String connectionString = "jdbc:mysql://localhost:3306/DSA";
+	private static final String username = "root";
+	private static final String password = "root";
 
-	// jdbc Connection
+	/**
+	 * jdbc Connection
+	 */
 	private static Connection connection;
-
+	
+	/**
+	 * Private Constructor.
+	 */
 	private DBManager() {}
 
+	/**
+	 * Method getConnection.
+	 * @return the existing open connection to the database or a new one if no open connections are present. 
+	 */
 	public static Connection getConnection() {
 		if (connection == null) {
 			try	{
 				Class.forName("com.mysql.jdbc.Driver");
 
 				//Get a connection
-				connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/DSA", "root", "root");
+				connection = DriverManager.getConnection(connectionString, username, password);
 			} catch (Exception except) {
 				except.printStackTrace();
 			}
 		}
 		return connection;
 	}
-
+	
+	/**
+	 * Method closeConnection.
+	 */
 	public static void closeConnection() {
 		try {
 			if (connection != null && !connection.isClosed()) {
@@ -43,6 +65,10 @@ public class DBManager {
 		}
 	}
 
+	/**
+	 * Store data in a List of MonitorDTO in the database.
+	 * @param data the list of MonitorDTO
+	 */
 	public static void storeData(ArrayList<MonitorDTO> data)
 	{
 		try {
@@ -60,6 +86,10 @@ public class DBManager {
 		}
 	}
 	
+	/**
+	 * Check all the changes in the sleeptime and flush the changes.
+	 * @return A map with the changes.
+	 */
 	public static Map<Integer, Integer> flushSleeptimeUpdates() {
 		HashMap<Integer,Integer> result = new HashMap<Integer, Integer>();
 		
@@ -95,6 +125,10 @@ public class DBManager {
 		return result;
 	}
 	
+	/**
+	 * Method used when the server is starting to inform the server to send all the sleeptimes
+	 * to the monitor.
+	 */
 	public static void initializeSleeptimeUpdates() {
 		String sql = "UPDATE sensor " +
 			     	 "SET changed=1";
