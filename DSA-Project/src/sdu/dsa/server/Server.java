@@ -42,7 +42,9 @@ public class Server {
 	public Server(int port, final InetAddress monitorIp, final int monitorPort) {
 		try {
 			running = true;
-			serverSocket = new ServerSocket(port);			
+			serverSocket = new ServerSocket(port);
+			
+			System.out.println("Server Started");
 			
 			// Inform the database to send all the sleeptimes to the monitor
 			DBManager.initializeSleeptimeUpdates();
@@ -69,8 +71,6 @@ public class Server {
 			});
 			
 			sleeptimeUpdatesTimer.start();
-			
-			System.out.println("Server Started");
 			
 			while (running) {
 				clientSocket = serverSocket.accept();
